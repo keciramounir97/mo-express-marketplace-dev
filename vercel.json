@@ -1,23 +1,15 @@
 {
   "version": 2,
-  "functions": {
-    "api/index.js": {
-      "runtime": "nodejs22.x",
-      "maxDuration": 60
+  "builds": [
+    {
+      "src": "api/index.js",
+      "use": "@vercel/node"
     }
-  },
-  "rewrites": [
+  ],
+  "routes": [
     {
-      "source": "/api/v1/:path*",
-      "destination": "/api"
-    },
-    {
-      "source": "/api",
-      "destination": "/api"
-    },
-    {
-      "source": "/",
-      "destination": "/api"
+      "src": "/(.*)",
+      "dest": "/api/index.js"
     }
   ]
 }
