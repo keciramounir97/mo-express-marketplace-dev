@@ -154,23 +154,34 @@ app.use((err, req, res, next) => {
 // ============================================================================
 
 // Importation du script d'ensemencement (.env)
-if (!process.env.VERCEL) {
-  const redisClient = createRedisClient();
-  const server = http.createServer(app);
-  const io = initSocket(server);
-  registerChatSocketHandlers(io);
+const isStandalone =
+  !process.env.VERCEL &&
+  !process.env.CF_PAGES &&
+  !process.env.CLOUDFLARE_WORKER &&
+  !process.env.WORKER_ENV &&
+  process.env.NODE_ENV !== "production";
 
-  const PORT = process.env.PORT || 5000;
-  server.listen(PORT, async () => {
-    console.log(`🚀 Serveur Backend 2 démarré sur le port ${PORT}`);
-    console.log(`⚡ WebSockets (Socket.io) écoute sur ws://localhost:${PORT}`);
-    try {
-      const { seedDatabase } = await import("./config/seed.js");
-      seedDatabase().catch((err) => console.log("Seeding deferred:", err.message));
-    } catch (err) {
-      console.log("Seeding import deferred:", err.message);
-    }
-  });
+if (isStandalone) {
+  try {
+    const redisClient = createRedisClient();
+    const server = http.createServer(app);
+    const io = initSocket(server);
+    if (io) registerChatSocketHandlers(io);
+
+    const PORT = process.env.PORT || 5000;
+    server.listen(PORT, async () => {
+      console.log(`🚀 Serveur Backend 2 démarré sur le port ${PORT}`);
+      console.log(`⚡ WebSockets (Socket.io) écoute sur ws://localhost:${PORT}`);
+      try {
+        const { seedDatabase } = await import("./config/seed.js");
+        seedDatabase().catch((err) => console.log("Seeding deferred:", err.message));
+      } catch (err) {
+        console.log("Seeding import deferred:", err.message);
+      }
+    });
+  } catch (err) {
+    console.log("Standalone initialization skipped:", err.message);
+  }
 }
 
 export default app;

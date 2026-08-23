@@ -1,6 +1,9 @@
 import app from "./server.js";
 import { Readable } from "stream";
 
+process.env.IS_CLOUDFLARE_WORKER = "true";
+process.env.WORKER_ENV = "true";
+
 export default {
   async fetch(request, env, ctx) {
     if (env) {
