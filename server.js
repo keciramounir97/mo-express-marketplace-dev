@@ -101,7 +101,7 @@ app.use(checkBannedMiddleware);
 app.use(morganMiddleware);
 
 import path from "path";
-import { fileURLToPath } from "url";
+import { fileURLToPath, pathToFileURL } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -169,7 +169,11 @@ app.use((err, req, res, next) => {
 // ============================================================================
 
 // Importation du script d'ensemencement (.env)
+const isDirectExecution =
+  process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url;
+
 const isStandalone =
+  isDirectExecution &&
   !process.env.VERCEL &&
   !process.env.CF_PAGES &&
   !process.env.CLOUDFLARE_WORKER &&
