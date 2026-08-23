@@ -173,12 +173,11 @@ const isDirectExecution =
   process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url;
 
 const isStandalone =
-  isDirectExecution &&
-  !process.env.VERCEL &&
-  !process.env.CF_PAGES &&
-  !process.env.CLOUDFLARE_WORKER &&
-  !process.env.WORKER_ENV &&
-  process.env.NODE_ENV !== "production";
+  process.env.RENDER ||
+  (!process.env.VERCEL &&
+    !process.env.CF_PAGES &&
+    !process.env.CLOUDFLARE_WORKER &&
+    !process.env.WORKER_ENV);
 
 if (isStandalone) {
   try {
