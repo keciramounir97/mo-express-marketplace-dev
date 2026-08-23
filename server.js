@@ -140,9 +140,9 @@ app.get(["/favicon.ico", "/api/favicon.ico"], (req, res) => res.status(204).end(
 
 // Route racine d'accueil et de test d'état du serveur (Healthcheck)
 app.get(["/", "/api", "/api/index", "/api/index.js"], (req, res) => {
-  res.json({
+  res.status(200).json({
     status: "online",
-    message: "🚀 Serveur Backend 2 (AliExpress Clone) est opérationnel !",
+    service: "mo-express-marketplace-api",
     timestamp: new Date().toISOString(),
   });
 });
@@ -188,6 +188,14 @@ if (isStandalone) {
     if (io) registerChatSocketHandlers(io);
 
     const PORT = process.env.PORT || 5000;
+    server.on("error", (error) => {
+      if (error.code === "EADDRINUSE") {
+        console.error(`Port ${PORT} is already in use. Stop the existing backend process before restarting.`);
+        return;
+      }
+      console.error("Standalone server error:", error);
+    });
+
     server.listen(PORT, async () => {
       console.log(`🚀 Serveur Backend 2 démarré sur le port ${PORT}`);
       console.log(`⚡ WebSockets (Socket.io) écoute sur ws://localhost:${PORT}`);
