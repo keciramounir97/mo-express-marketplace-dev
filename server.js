@@ -49,7 +49,7 @@ const app = express();
 app.set("trust proxy", 1);
 
 // 6. Connexion à la base de données MongoDB (asynchrone avec mise en cache)
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
   if (
     req.path === "/" ||
     req.path === "/api" ||
@@ -60,8 +60,23 @@ app.use((req, res, next) => {
   ) {
     return next();
   }
-  connectDB().catch(() => {});
-  next();
+
+  try {
+    const connection = await connectDB();
+    if (!connection) {
+      return res.status(503).json({
+        success: false,
+        message: "Database temporarily unavailable.",
+      });
+    }
+    return next();
+  } catch (error) {
+    console.error("Database initialization failed:", error.message);
+    return res.status(503).json({
+      success: false,
+      message: "Database temporarily unavailable.",
+    });
+  }
 });
 
 // 7. (WebSockets, Redis et Serveur HTTP sont initialisés ci-dessous uniquement en mode local/standalone)
